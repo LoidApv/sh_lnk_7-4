@@ -1,0 +1,10 @@
+
+redirect:
+    path: /{shortLinkSlug}
+    controller: App\Controller\ShortLinksController::redirectByShortLink
+    methods: GET
+
+post_link:
+    path: /post_link
+    controller: App\Controller\ShortLinksController::addShortLink
+    methods: POST
