@@ -2,13 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\LinksMap;
+use App\Model\UserLink;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-
-use App\Form\LinkType;
-use App\Repository\LinksMapRepository;
-use App\Repository\UserRepository;
+use Symfony\Component\HttpFoundation\{Request, Response, JsonResponse};
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\Persistence\ManagerRegistry;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -21,21 +21,10 @@ use App\Repository\UserRepository;
  * @author Main
  */
 class ShortLinksController extends AbstractController {
-    
-    private UserRepository $userRepo;
-    private LinksMapRepository $linkRepo;
-    
-    public function __construct(UserRepository $userRepo, LinksMapRepository $linkRepo) {
-        $this->userRepo = $userRepo;
-        $this->linkRepo= $linkRepo;
-    }
-    
+
     /*
     function index(): Response{
-        
-        # Надо подвязать к ссылкам
-        $user = $this->userRepository->find(1);
-        
+
         $links = $this->linkRepo->findAll();
         foreach($links as $link){
             $retLinks[] = [
@@ -51,48 +40,47 @@ class ShortLinksController extends AbstractController {
     }
     */
     
-    public function redirectByShortLink(string $shortLinkSlug): Response{
-        
-        # Авторизация для использования короткой ссылки не оч затея
-        # $user = $this->userRepo->find(1); 
-        
-        $link = $this->linkRepo->findOneBy(["shortLinkSlug"=>$shortLinkSlug]);
+    public function redirectByShortLink(
+            string $shortLinkSlug, 
+            ManagerRegistry $managerRegistry
+    ): Response{
+        $em = $managerRegistry->getManager();
+        $linkMap = $em->getRepository(LinksMap::class)->findOneBy(["shortLinkSlug"=>$shortLinkSlug]);
 
-        if($link){
-            $originalLink = $link->getOriginalLink();
+        if($linkMap){
+            $originalLink = $linkMap->getOriginalLink();
             return $this->redirect($originalLink);
         }else{
-            return new Response("Адрес не найден", 404);
+            return new JsonResponse("Адрес не найден", 404);
         }
     }
     
-    public function addShortLink(Request $request): Response{
-        
-        
-        $user = $this->userRepo->find(1); // Типо получили текущего пользователя
-        /*  Чтоб не дропало без создания дефолт юзера
-        if(!$user){
-            $message = [
-                "text" => "Пользователь по умолчанию умер"
-            ];
-            return $this->json($message, 400);
-        }*/
+    public function addShortLink(
+            Request $request,
+            SerializerInterface $serializer,
+            ValidatorInterface $validator,
+            ManagerRegistry $managerRegistry
+    ): JsonResponse
+    {
+        $userLink = $serializer->deserialize($request->getContent(), UserLink::class, 'json', []);
+        $errors = $validator->validate($userLink);
 
-        $form = $this->createForm(LinkType::class);
-        $form->submit($request->request->all(), false);
-        $formData = $form->getData();
-
-        if($form->isSubmitted() && $form->isValid()){
+        if(count($errors)==0){
              
-            $link = $this->linkRepo->registerLink($formData["name"], $formData["originalLink"]);
-            if(isset($user) && !is_null($user)){
-                $this->userRepo->addLink($user, $link);
-            }
-            $shortLink = "http://" . $_SERVER["HTTP_HOST"] . "/" . $link->getShortLinkSlug();
+            $em = $managerRegistry->getManager();
+            
+            $entity = LinksMap::fromUserLink($userLink);
+            $em->persist($entity);
+            $em->flush();
+
+            $shortLinkSlug = base_convert($entity->getId(), 10, 36);
+            $entity->setShortLinkSlag($shortLinkSlug);
+            $em->flush();
+            
+            $shortLink = "http://" . $_SERVER["HTTP_HOST"] . "/" . $shortLinkSlug;
             return $this->json($shortLink);
             
         }else{
-            $errors = $form->getErrors();
             $message = [
                 "text" => "Ошибка валидации",
                 "errors" => $errors

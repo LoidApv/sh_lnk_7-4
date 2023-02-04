@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\LinksMapRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Model\UserLink;
 
 /**
- * @ORM\Entity(repositoryClass=LinksMapRepository::class)
+ * @ORM\Entity
  */
 class LinksMap
 {
@@ -41,6 +41,14 @@ class LinksMap
         $this->lastUpdate = new \Datetime;
     }
     
+    public static function fromUserLink(UserLink $userLink): self{
+        $entity = new self;
+        $entity->setName($userLink->getName());
+        $entity->setOriginalLink($userLink->getOriginalLink());
+        return $entity;
+    }
+
+
     /**
      * @ORM\PreUpdate
      */
