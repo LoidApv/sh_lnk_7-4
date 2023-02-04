@@ -9,27 +9,16 @@
 			"name": "Добавление",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
 				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "name",
-							"value": "Asd",
-							"type": "default"
-						},
-						{
-							"key": "originalLink",
-							"value": "https://symfony.com/doc/5.4/doctrine.html#updating-an-object",
-							"type": "default"
-						},
-						{
-							"key": "s",
-							"value": "123",
-							"type": "default",
-							"disabled": true
-						}
-					]
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Asd\",\r\n    \"originalLink\": \"https://symfony.com/doc/5.4/doctrine.html#updating-an-object\"\r\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8000/post_link",

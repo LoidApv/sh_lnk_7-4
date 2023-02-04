@@ -14,7 +14,6 @@ DATABASE_URL="postgresql://postgres:12345@127.0.0.1:5432/pg_shlink_db?serverVers
 composer update // vendor по умолчанию в игноре у гита
 php bin/console doctrine:database:create // создание бд
 php bin/console doctrine:migrations:migrate // накатывание бд
-/*опционально*/ php bin/console doctrine:fixtures:load // создаст пользователя по умолчанию, но и без него работает (просто для теста авто-связи таблиц) P.s. я не знаю добавиляются ли записи в промежуточную таблицу
 ```
 - Как нибудь поднять сервер (На винде можно запустить run.bat - встроенный сервер php)
 - Надеюсь ничего не забыл
@@ -29,24 +28,22 @@ php bin/console doctrine:migrations:migrate // накатывание бд
 			"name": "Добавление",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "default"
+					}
+				],
 				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "name",
-							"value": "Asd",
-						},
-						{
-							"key": "originalLink",
-							"value": "https://symfony.com/doc/5.4/doctrine.html#updating-an-object",
-						}
-					]
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Asd\",\r\n    \"originalLink\": \"https://symfony.com/doc/5.4/doctrine.html#updating-an-object\"\r\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8000/post_link",
 				}
-			}
+			},
+			"response": []
 		},
 		{
 			"name": "Переход",
@@ -57,6 +54,7 @@ php bin/console doctrine:migrations:migrate // накатывание бд
 					"raw": "http://localhost:8000/1",
 				}
 			},
+			"response": []
 		}
 	]
 }
@@ -65,7 +63,8 @@ php bin/console doctrine:migrations:migrate // накатывание бд
 ### О веселом
 - Вин 7
 - symfony-cli не встала (точнее промлемы со scoop)
-- БД из OpenServer
+- Ide - netbeans, который не хочет смотреть внутрь vendor
+- БД из OpenServer, чтобы не фонила
 - Консоль из OpenServer - она сожрала composer и он больше ниоткуда не вызывается (composer везде заменяется на "")
 - Сервер - встроенный в php, изначально хотел портативную штуку делать с SQLite (Для маленькой задачи с ORM разницы почти нет), потом долшло что на линухе оно не запустится
 - В общем, надо разбираться с докером (docker-composer звучит как что-то портативное)
