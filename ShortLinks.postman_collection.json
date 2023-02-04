@@ -1,0 +1,68 @@
+{
+	"info": {
+		"_postman_id": "1c3fa98d-dfd7-4a5f-9294-0f2c558beee8",
+		"name": "ShortLinks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Добавление",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "Asd",
+							"type": "default"
+						},
+						{
+							"key": "originalLink",
+							"value": "https://symfony.com/doc/5.4/doctrine.html#updating-an-object",
+							"type": "default"
+						},
+						{
+							"key": "s",
+							"value": "123",
+							"type": "default",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8000/post_link",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"post_link"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Переход",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

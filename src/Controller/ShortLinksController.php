@@ -2,12 +2,10 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use App\Entity\LinksMap;
 use App\Form\LinkType;
 use App\Repository\LinksMapRepository;
 use App\Repository\UserRepository;
@@ -55,13 +53,13 @@ class ShortLinksController extends AbstractController {
     
     public function redirectByShortLink(string $shortLinkSlug): Response{
         
-        # Надо подвязать к ссылкам
-        $user = $this->userRepo->find(1); // Типо получили текущего пользователя
+        # Авторизация для использования короткой ссылки не оч затея
+        # $user = $this->userRepo->find(1); 
         
-        $linkMap = $this->linkRepo->findOneBy(["shortLinkSlug"=>$shortLinkSlug]);
+        $link = $this->linkRepo->findOneBy(["shortLinkSlug"=>$shortLinkSlug]);
 
-        if($linkMap){
-            $originalLink = $linkMap->getOriginalLink();
+        if($link){
+            $originalLink = $link->getOriginalLink();
             return $this->redirect($originalLink);
         }else{
             return new Response("Адрес не найден", 404);
@@ -70,8 +68,15 @@ class ShortLinksController extends AbstractController {
     
     public function addShortLink(Request $request): Response{
         
-        # Надо подвязать к ссылкам
-        $user = $this->userRepo->find(1);
+        
+        $user = $this->userRepo->find(1); // Типо получили текущего пользователя
+        /*  Чтоб не дропало без создания дефолт юзера
+        if(!$user){
+            $message = [
+                "text" => "Пользователь по умолчанию умер"
+            ];
+            return $this->json($message, 400);
+        }*/
 
         $form = $this->createForm(LinkType::class);
         $form->submit($request->request->all(), false);
@@ -79,8 +84,11 @@ class ShortLinksController extends AbstractController {
 
         if($form->isSubmitted() && $form->isValid()){
              
-            $shortLink = $this->linkRepo->registerLink(
-                    $formData["name"], $formData["originalLink"]);
+            $link = $this->linkRepo->registerLink($formData["name"], $formData["originalLink"]);
+            if(isset($user) && !is_null($user)){
+                $this->userRepo->addLink($user, $link);
+            }
+            $shortLink = "http://" . $_SERVER["HTTP_HOST"] . "/" . $link->getShortLinkSlug();
             return $this->json($shortLink);
             
         }else{

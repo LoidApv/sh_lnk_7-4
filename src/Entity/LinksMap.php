@@ -42,7 +42,7 @@ class LinksMap
     }
     
     /**
-     * @ORM\preUpdate
+     * @ORM\PreUpdate
      */
     function preUpdate(){    //  Не знаю работает ли, но чтоб было
         $this->lastUpdate = new \Datetime;

@@ -39,7 +39,7 @@ class LinksMapRepository extends ServiceEntityRepository
         }
     }
     
-    public function registerLink(string $name, string $originalLink): string
+    public function registerLink(string $name, string $originalLink): LinksMap
     {
         $entity = new LinksMap;
         $entity->setName($name);
@@ -52,7 +52,7 @@ class LinksMapRepository extends ServiceEntityRepository
         $entity->setShortLinkSlag($shortLinkSlug);
         
         $this->getEntityManager()->flush();
-        return "http://" . $_SERVER["HTTP_HOST"] . "/" . $shortLinkSlug;
+        return $entity;
     }
 
 //    /**

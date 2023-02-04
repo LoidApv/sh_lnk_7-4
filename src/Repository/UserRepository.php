@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\User;
+use App\Entity\{User, LinksMap};
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -37,6 +37,12 @@ class UserRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+    
+    public function addLink(User $entity, LinksMap $link): void
+    {
+        $entity->getLinks()->add($link);
+        $this->getEntityManager()->flush();
     }
 
 //    /**

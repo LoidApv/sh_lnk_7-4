@@ -2,11 +2,15 @@
 
 namespace App\Entity;
 
+use App\Entity\LinksMap;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\Table(name="`user`")
  */
 class User
 {
@@ -21,6 +25,21 @@ class User
      * @ORM\Column(type="string", length=50)
      */
     private $name;
+    
+    /**
+     * 1-М через М-М
+     * @ORM\ManyToMany(targetEntity="LinksMap")
+     * @ORM\JoinTable(name="users_links",
+     *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="lm_id", referencedColumnName="id", unique=true)}
+     *      )
+     * @var Collection<int, LinksMap>
+     */
+    private Collection $links;
+    
+    function __construct(){
+        $this->links = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -37,5 +56,10 @@ class User
         $this->name = $name;
 
         return $this;
+    }
+    
+    public function getLinks(): Collection
+    {
+        return $this->links;
     }
 }
